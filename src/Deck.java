@@ -11,11 +11,24 @@ public class Deck {
 	private void createDeck() {
 		this.deck = new ArrayList<Card>();
 		for(Suit suit: Suit.values()) {
-			for(Integer i=1;i<14;i++) {
-				this.deck.add(new Card(i,suit));
+			for(Value val: Value.values()) {
+				this.deck.add(new Card(val,suit));
 			}
 		}
 		Collections.shuffle(this.deck);
+	}
+	
+	public ArrayList<Card> dealHand(){
+		ArrayList<Card> dealt = new ArrayList<Card>();
+		for(int i = 0; i<13; i++) {
+			dealt.add(this.deck.get(0));
+			deck.remove(0);
+		}
+		return dealt;
+	}
+	
+	public ArrayList<Card> getDeck(){
+		return this.deck;
 	}
 	
 	public String toString() {
