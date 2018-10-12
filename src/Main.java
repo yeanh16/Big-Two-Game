@@ -22,7 +22,7 @@ public class Main {
 			ArrayList<Card> played = parseMove(move);
 			if(board.validMove(played)) {
 				System.out.println("Player played " + played);
-				System.out.println(GameBoard.comboClassifier(played));
+				//System.out.println(GameBoard.comboClassifier(played));
 				board.setFirstMove(false);
 				board.setCurrent(played);
 				one.getHand().removeAll(played);
