@@ -1,39 +1,55 @@
+package game;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Scanner;
 
-public class Main {
-
-	public static void main(String[] args) {
-		Deck deck = new Deck();
-		System.out.println(deck);
-		GameBoard board = new GameBoard();
-		Player one = new Player(deck.dealHand());
-		
-		
-		Scanner reader = new Scanner(System.in);  // Reading from System.in
-		while(true){
-			ArrayList<Card> playerHand = one.getHand();
-			Collections.sort(playerHand);		    
-			System.out.println("Your hand is: \n" + playerHand);
-			System.out.println("Enter your move e.g 3H,3S");
-			String move = reader.nextLine();
-			ArrayList<Card> played = parseMove(move);
-			if(board.validMove(played)) {
-				System.out.println("Player played " + played);
-				//System.out.println(GameBoard.comboClassifier(played));
-				board.setFirstMove(false);
-				board.setCurrent(played);
-				one.getHand().removeAll(played);
-			}else {
-				System.out.println("Invalid Move");
+public class Player {
+	private ArrayList<Card> hand;
+	public boolean passed;
+	
+	public Player(ArrayList<Card> hand) {
+		this.passed = false;
+		this.hand = hand;
+		Collections.sort(this.hand);
+	}
+	
+	public ArrayList<Card> getHand(){
+		return this.hand;
+	}
+	
+	public void setHand(ArrayList<Card> newHand) {
+		this.hand = newHand;
+		Collections.sort(this.hand);
+	}
+	
+	public void pass() {
+		this.passed = true;
+	}
+	
+	public void resetPass() {
+		this.passed = false;
+	}
+	
+	public ArrayList<Card> getMove(GameBoard gb){
+		System.out.println("Your hand is: \n" + hand);
+		System.out.println("Enter your move e.g 3H,3S");
+		while(true) {
+			String movestr = gb.reader.nextLine();
+			if(movestr.equalsIgnoreCase("pass")) {
+				pass();
+				return null;
 			}
-			
+			ArrayList<Card> move = parseMove(movestr);
+			if(gb.validMove(move)) {
+				this.hand.removeAll(move);
+				return move;
+			}else {
+				System.out.println("Invalid move, try again");
+			}
 		}
 
 	}
-		
+	
 	public static ArrayList<Card> parseMove(String movestr){
 		ArrayList<Card> cards = new ArrayList<Card>();
 		String[] moves = movestr.split(",");
@@ -67,7 +83,4 @@ public class Main {
 		return cards;
 	}
 	
-	
-	 
-
 }

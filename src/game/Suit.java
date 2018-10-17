@@ -1,3 +1,5 @@
+package game;
+
 public enum Suit{SPADES(1), HEARTS(2), CLUBS(3), DIAMOND(4);
 	
 	int order;

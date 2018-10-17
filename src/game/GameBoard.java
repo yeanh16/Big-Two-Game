@@ -1,17 +1,111 @@
+package game;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Scanner;
+
+import AI.AISimplePlayer;
 
 public class GameBoard {
 	public ArrayList<Card> current;
 	public Combo currentCombo;
 	public Card helperComboHighCard;
 	public boolean firstMove; //first move of a round
-	public int turn;
+	public int numberOfPlayers;
+	public int playerToMove;
+	public ArrayList<Player> playerList;
 	
-	public GameBoard() {
+	public Scanner reader = new Scanner(System.in);  // Reading from System.in for player
+	public Scanner getReader() {
+		return this.reader;
+	}
+	
+	public GameBoard(int numberOfPlayers) {
+		this.numberOfPlayers = numberOfPlayers;
 		this.firstMove = true;
 		this.currentCombo = null;
+		//TODO: alternate first player to move
+		this.playerToMove = 0;
+		
+		Deck deck = new Deck();
+
+		this.playerList = new ArrayList<Player>();
+		this.playerList.add(new Player(deck.dealHand()));
+		for(int i = 1; i<numberOfPlayers;i++) {
+			this.playerList.add(new AISimplePlayer(deck.dealHand()));
+		}
+	}
+	
+	public int getLowestHand() {
+		int min = 999;
+		for(int i=0;i<numberOfPlayers;i++) {
+			if(playerList.get(i).getHand().size() < min) {
+				min = playerList.get(i).getHand().size();
+			}
+		}
+		return min;
+	}
+	
+	public void startGame() {
+		int passCount = 0;
+		while(true) {
+			if(passCount != numberOfPlayers - 1) {
+				ArrayList<Card> move = playerList.get(playerToMove).getMove(this);
+				if(move != null) {
+					System.out.println("Player " + (playerToMove+1) + ": " + move);
+					setMove(move);
+					passCount = 0;
+					resetPasses();
+					if(playerList.get(playerToMove).getHand().size() == 0) {
+						System.out.println("Player " + (playerToMove+1) + " wins!!!!");
+						resetGame();
+						this.playerToMove = playerToMove - 1; //so that the winner plays first next game
+					}
+				}else {
+					System.out.println("Player " + (playerToMove+1) + " passes");
+					passCount++;
+				}
+				this.playerToMove = (playerToMove+1) % (numberOfPlayers);
+			}else {
+				System.out.println("Player " + (playerToMove+1) + " wins set.");
+				passCount = 0;
+				resetSet();
+			}
+		}
+	}
+	
+	public void resetGame() {
+		resetSet();
+		Deck deck = new Deck();
+		for(int i = 0; i<numberOfPlayers;i++) {
+			this.playerList.get(i).setHand(deck.dealHand());
+		}
+	}
+	
+	public void resetSet() {
+		this.firstMove = true;
+		this.currentCombo = null;
+	}
+	
+	public void resetPasses() {
+		for(int i=0;i<numberOfPlayers;i++) {
+			this.playerList.get(i).resetPass();
+		}
+	}
+	
+	public void setMove(ArrayList<Card> move) {
+		if(validMove(move)) {
+			if(firstMove) {
+				firstMove = false;
+			}
+			setCurrent(move);
+		}
+	}
+	
+	
+	public Player getPlayer(int index) {
+		return this.playerList.get(index);
 	}
 	
 	public void setFirstMove(boolean val) {
@@ -67,11 +161,10 @@ public class GameBoard {
 					return false;
 				}
 				if(move.size()==5) {
-					if(this.currentCombo.getOrder() > comboClassifier(move).getCombo().getOrder()) {
+					Pair<Combo,Card> movePair = comboClassifier(move);
+					if(this.currentCombo.getOrder() > movePair.getFirst().getOrder()) {
 						return true;
-					}
-					//logic for full house disputes
-					if(this.helperComboHighCard.getValueOrder() > comboClassifier(move).getCard().getValueOrder()) {
+					}else if(movePair.getFirst() == Combo.FULL_HOUSE && this.helperComboHighCard.getValueOrder() > movePair.getSecond().getValueOrder()) {//logic for full house disputes
 						return true;
 					}
 					//logic for flush
@@ -116,7 +209,7 @@ public class GameBoard {
 			if(played.get(i).getValue().getFace() == played.get(i+1).getValue().getFace()-1) {
 				bstraight = true;
 			}
-			else if(i==0 && played.get(1).getValue().getFace()==10) {//special case where A is used as last card, then check if next is 10,J,Q,K
+			else if(i==0 && played.get(0).getValue().getFace() ==1 && played.get(1).getValue().getFace()==10) {//special case where A is used as last card, then check if next is 10,J,Q,K
 				bstraight = true;
 			}
 			else {
@@ -147,26 +240,26 @@ public class GameBoard {
 		switch(sameCount) {
 			case 1: if(played.get(1).getValue()==played.get(2).getValue()&&played.get(2).getValue()==played.get(3).getValue()&&played.get(3).getValue()==played.get(4).getValue()) {
 				return new Pair(Combo.FOUR_OF_A_KIND,played.get(4));
-			}
+			}break;
 			case 2: if(played.get(2).getValue()==played.get(3).getValue()&&played.get(3).getValue()==played.get(4).getValue()) {
 				return new Pair(Combo.FULL_HOUSE,played.get(4));
-			}
+			}break;
 			case 3: if(played.get(3).getValue()==played.get(4).getValue()) {
 				return new Pair(Combo.FULL_HOUSE,played.get(2));
-			}
+			}break;
 			case 4:return new Pair(Combo.FOUR_OF_A_KIND,played.get(3));
 			default: break;
 		}
 		return null;
-		
 	}
+
 	
 	public void setCurrent(ArrayList<Card> played) {
 		this.current = played;
 		if(played.size() == 5) {
 			Pair<Combo,Card> pair = comboClassifier(played);
-			this.currentCombo = pair.getCombo();
-			this.helperComboHighCard = pair.getCard();
+			this.currentCombo = pair.getFirst();
+			this.helperComboHighCard = pair.getSecond();
 		}
 	}
 }

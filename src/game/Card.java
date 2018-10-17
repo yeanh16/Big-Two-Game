@@ -1,3 +1,5 @@
+package game;
+
 public class Card implements Comparable<Card>{
 	
 	private Suit suit;

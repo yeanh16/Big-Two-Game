@@ -1,3 +1,5 @@
+package game;
+
 public enum Value{TWO(1),ACE(2),KING(3),QUEEN(4),JACK(5),TEN(6),NINE(7),EIGHT(8),SEVEN(9),SIX(10),FIVE(11),FOUR(12),THREE(13);
 		int order;
 		
@@ -9,7 +11,7 @@ public enum Value{TWO(1),ACE(2),KING(3),QUEEN(4),JACK(5),TEN(6),NINE(7),EIGHT(8)
 			return order;
 		}
 		
-		int getFace() {
+		public int getFace() {
 			switch(order) {
 			case 1: return 2;
 			case 2: return 1;
