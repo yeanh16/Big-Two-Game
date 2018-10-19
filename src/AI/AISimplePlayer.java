@@ -40,7 +40,6 @@ public class AISimplePlayer extends Player {
 		optimalMoveList = new ArrayList<ArrayList<Card>>();
 		getCombos();
 		gatherAllMoves();
-		test();
 	}
 	
 	@Override
@@ -405,7 +404,7 @@ public class AISimplePlayer extends Player {
 			optimalMoveListCopy.addAll(optimalMoveList);
 			optimalMoveList.clear();
 			optimalMoveList.addAll(optimalMoveListCopy);
-			System.out.println("Optimal move list: " + this.optimalMoveList);
+			if (debug) System.out.println("Optimal move list: " + this.optimalMoveList);
 
 		}
 }
